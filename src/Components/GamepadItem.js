@@ -9,7 +9,7 @@ import GamepadIcon from './GamepadIcon'
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        width: '550px',
+        minWidth: '550px',
         justifyContent: 'center',
         alignItems: 'center',
     },
@@ -17,25 +17,37 @@ const useStyles = makeStyles((theme) => ({
         padding: '0 40px 25px 40px'
     },
     button: {
-        width: '110px'
+        maxWidth: '110px',
+        minWidth: '95px'
     },
+    switch: {
+        minWidth: '190px'
+    }
 }));
+
+const initialState = {
+    delay: 0,
+    duration: 1000,
+    weakMagnitude: 0.5,
+    strongMagnitude: 0,
+    isNeedRepeat: false,
+    pressedButtons: []
+};
+
+const maxValues = {
+    delay: 2000,
+    duration: 5000,
+    weakMagnitude: 1.0,
+    strongMagnitude: 1.0
+};
 
 export default function GamepadItem(props) {
     const classes = useStyles();
 
-    const [state, setState] = useState({
-        delay: 0,
-        duration: 1000,
-        weakMagnitude: 0,
-        strongMagnitude: 1.0,
-        isNeedRepeat: false,
-        pressedButtons: []
-    });
+    const [state, setState] = useState(initialState);
 
     const [pulseInterval, setPulseInterval] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
-    // const [pressedButtons, setPressedButtons] = useState([]);
 
     const { instance } = props;
     const { delay, duration, weakMagnitude, strongMagnitude, isNeedRepeat } = state;
@@ -55,7 +67,7 @@ export default function GamepadItem(props) {
         if (isNeedRepeat) {
             handleStop();
             pulse();
-            setPulseInterval(setInterval(pulse, 0.6 * duration));
+            setPulseInterval(setInterval(pulse, duration + delay));
             setIsStarted(true);
         } else {
             pulse();
@@ -68,7 +80,24 @@ export default function GamepadItem(props) {
     };
 
     const handleChange = (name, value) => {
-        setState({ ...state, [name]: value });
+        const sum = delay + duration;
+        switch (name) {
+            case 'delay':
+                if (sum >= maxValues.duration) {
+                    setState({ ...state, delay: value, duration: maxValues.duration - delay });
+                    break;
+                }
+            // eslint-disable-next-line no-fallthrough
+            case 'duration':
+                if (sum >= maxValues.duration) {
+                    setState({ ...state, delay: delay - (sum - maxValues.duration), duration: value });
+                    break;
+                }
+            // eslint-disable-next-line no-fallthrough
+            default:
+                setState({ ...state, [name]: value });
+        }
+
         if (isStarted) {
             handleStop();
             handleStart();
@@ -76,18 +105,7 @@ export default function GamepadItem(props) {
     };
 
     useEffect(() => {
-        /*
-            const buttonsObserver = setInterval(() => {
-                const buttons = [];
-                each(navigator.getGamepads()[instance.index].buttons, (button, index) => {
-                    button.pressed && buttons.push({ index, button });
-                });
-                setPressedButtons(buttons);
-            }, 150);
-        */
-
         return () => {
-            // buttonsObserver && clearInterval(buttonsObserver);
             pulseInterval && clearInterval(pulseInterval);
         }
     }, []); // eslint-disable-line
@@ -103,26 +121,26 @@ export default function GamepadItem(props) {
 
                 <Typography gutterBottom>Delay: {delay} ms</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={delay} defaultValue={0} step={10} min={0} max={2000}
+                        value={delay} defaultValue={0} step={10} min={0} max={maxValues.delay}
                         onChange={(e, value) => handleChange("delay", value)} />
 
                 <Typography gutterBottom>Duration: {duration} ms</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={duration} defaultValue={1000} step={100} min={100} max={5000}
+                        value={duration} defaultValue={1000} step={100} min={100} max={maxValues.duration}
                         onChange={(e, value) => handleChange("duration", value)} />
 
                 <Typography gutterBottom>Weak magnitude</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={weakMagnitude} defaultValue={1} step={0.01} min={0} max={1}
+                        value={weakMagnitude} defaultValue={1} step={0.01} min={0} max={maxValues.weakMagnitude}
                         onChange={(e, value) => handleChange("weakMagnitude", value)}/>
 
                 <Typography gutterBottom>Strong magnitude</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={strongMagnitude} defaultValue={1} step={0.01} min={0} max={1}
+                        value={strongMagnitude} defaultValue={1} step={0.01} min={0} max={maxValues.strongMagnitude}
                         onChange={(e, value) => handleChange("strongMagnitude", value)} />
 
                 <Grid container className={classes.root} spacing={2}>
-                    <Grid item xs={5}>
+                    <Grid item xs={5} className={classes.switch}>
                         <FormControlLabel
                             control={<Switch checked={isNeedRepeat} disabled={isStarted} onChange={() => handleChange("isNeedRepeat", !isNeedRepeat)}/>}
                             label="Interval repeat"
