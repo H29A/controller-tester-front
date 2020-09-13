@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 
 import {
     Grid, Slider, Button, Switch, FormControlLabel,
-    makeStyles, Paper, Typography, LinearProgress, FormHelperText
+    makeStyles, Typography, LinearProgress, FormHelperText
 } from '@material-ui/core';
 
 import GamepadIcon from './GamepadIcon'
@@ -112,7 +112,7 @@ export default function GamepadItem(props) {
 
     return(
         <Grid container spacing={3} className={classes.root}>
-            <Paper className={classes.paper}>
+            <div className={classes.paper}>
                 <Grid container justify="center">
                     <GamepadIcon />
                 </Grid>
@@ -158,7 +158,7 @@ export default function GamepadItem(props) {
                         }
                     </Grid>
                 </Grid>
-            </Paper>
+            </div>
         </Grid>
     );
 }

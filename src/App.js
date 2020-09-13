@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { map } from 'lodash';
-import {makeStyles, Paper, LinearProgress, FormHelperText, Grid} from '@material-ui/core';
+import { makeStyles, LinearProgress, FormHelperText, Grid } from '@material-ui/core';
 
 import GamepadItem from './Components/GamepadItem';
 
@@ -17,11 +17,10 @@ const useStyles = makeStyles((theme) => ({
     },
     root: {
         width: '1500px',
-        justifyContent: 'center',
-        alignItems: 'center',
+        justifyContent: 'center'
     },
     paper: {
-        padding: '25px'
+        padding: '25px 25px 15px 25px'
     },
     progress: {
         margin: '20px 0 0 0'
@@ -68,13 +67,14 @@ function App() {
                       )
                   }
                 </Grid>
-              : <Paper className={classes.paper}>
+              : <div className={classes.paper}>
                   Waiting for gamepad connection
                   <FormHelperText style={{ textAlign: 'center' }}>
                       (If your gamepad is already connected - press any button)
                   </FormHelperText>
                   <LinearProgress color="secondary" className={classes.progress} />
-                </Paper>
+                  <FormHelperText style={{ marginTop: '20px', textAlign: 'center' }}>Version {process.env.BUILD_VERSION}</FormHelperText>
+                </div>
           }
       </header>
   );
