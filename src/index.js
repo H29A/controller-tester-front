@@ -2,16 +2,26 @@ import React from 'react';
 import ReactDOM from 'react-dom';
 import { ThemeProvider } from '@material-ui/core';
 import * as serviceWorker from './serviceWorker';
+import { Provider } from 'react-redux';
+import { loadState } from './utils/persist';
+import configureStore from './store';
 
 import './index.css';
-import App from './App';
+import App from './Containers/App';
 import theme from './theme';
+
+// Create redux store
+// Loading persisted state
+const initialState = loadState();
+const store = configureStore(initialState);
 
 ReactDOM.render(
   <React.StrictMode>
-      <ThemeProvider theme={theme}>
-        <App />
-      </ThemeProvider>
+      <Provider store={store} >
+          <ThemeProvider theme={theme}>
+            <App />
+          </ThemeProvider>
+      </Provider>
   </React.StrictMode>,
   document.getElementById('root')
 );

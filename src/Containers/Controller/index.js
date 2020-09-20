@@ -1,29 +1,28 @@
 import React, { useState, useEffect } from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'recompose';
+import { Map } from 'immutable';
+import PropTypes from 'prop-types';
 
 import {
     Grid, Slider, Button, Switch, FormControlLabel,
-    makeStyles, Typography, LinearProgress, FormHelperText
+    Typography, LinearProgress, FormHelperText
 } from '@material-ui/core';
 
-import GamepadIcon from './GamepadIcon'
+import { useStyles } from './styles';
 
-const useStyles = makeStyles((theme) => ({
-    root: {
-        minWidth: '550px',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    paper: {
-        padding: '0 40px 25px 40px'
-    },
-    button: {
-        maxWidth: '110px',
-        minWidth: '95px'
-    },
-    switch: {
-        minWidth: '190px'
-    }
-}));
+import { registerControllerRequested } from '../../store/controllers/actions';
+import { selectControllerData as mapStateToProps }  from  './selectors';
+
+import GamepadIcon from '../../Components/Icons/ControllerIcon'
+
+const mapDispatchToProps = (dispatch) => ({
+    registerController: (controllerData) => dispatch(registerControllerRequested(controllerData))
+});
+
+const enhancer = compose(
+    connect(mapStateToProps, mapDispatchToProps)
+);
 
 const initialState = {
     delay: 0,
@@ -41,7 +40,9 @@ const maxValues = {
     strongMagnitude: 1.0
 };
 
-export default function GamepadItem(props) {
+const { func, string } = PropTypes;
+
+function Controller(props) {
     const classes = useStyles();
 
     const [state, setState] = useState(initialState);
@@ -49,7 +50,7 @@ export default function GamepadItem(props) {
     const [pulseInterval, setPulseInterval] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
 
-    const { instance } = props;
+    const { instance, registerController } = props;
     const { delay, duration, weakMagnitude, strongMagnitude, isNeedRepeat } = state;
 
     const pulse = () => {
@@ -67,7 +68,7 @@ export default function GamepadItem(props) {
         if (isNeedRepeat) {
             handleStop();
             pulse();
-            setPulseInterval(setInterval(pulse, duration + delay));
+            setPulseInterval(setInterval(pulse, duration + delay - 20));
             setIsStarted(true);
         } else {
             pulse();
@@ -105,6 +106,7 @@ export default function GamepadItem(props) {
     };
 
     useEffect(() => {
+        registerController({ id: instance.id, buttons: instance.buttons.length, axes: instance.axes.length });
         return () => {
             pulseInterval && clearInterval(pulseInterval);
         }
@@ -162,3 +164,11 @@ export default function GamepadItem(props) {
         </Grid>
     );
 }
+
+Controller.propTypes = {
+    registerController: func,
+    registeredController: PropTypes.instanceOf(Map),
+    registrationControllerStatus: string
+};
+
+export default enhancer(Controller);

@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function GamepadIcon() {
+export default function ControllerIcon() {
     return (
         <svg
             xmlns='http://www.w3.org/2000/svg'

@@ -1,39 +1,34 @@
 import React, { useEffect, useState } from 'react';
+import { connect } from 'react-redux';
+import { compose } from 'recompose';
 import { map } from 'lodash';
-import { makeStyles, LinearProgress, FormHelperText, Grid } from '@material-ui/core';
+import PropTypes from 'prop-types';
+import { List } from 'immutable';
+import { LinearProgress, FormHelperText, Grid } from '@material-ui/core';
 
-import GamepadItem from './Components/GamepadItem';
+import { selectAppData as mapStateToProps }  from  './selectors';
+import { useStyles } from './styles';
 
-const useStyles = makeStyles((theme) => ({
-    header: {
-        backgroundColor: '#282c34',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontSize: 'calc(10px + 2vmin)',
-        color: 'white'
-    },
-    root: {
-        width: '1500px',
-        justifyContent: 'center'
-    },
-    paper: {
-        padding: '25px 25px 15px 25px'
-    },
-    progress: {
-        margin: '20px 0 0 0'
-    },
-    gamepad: {
-        margin: '70px'
-    }
-}));
+import Controller from '../Controller';
 
-function App() {
+import { loadRegisteredControllersRequested } from '../../store/controllers/actions';
+
+const mapDispatchToProps = (dispatch) => ({
+    loadRegisteredControllers: () => dispatch(loadRegisteredControllersRequested())
+});
+
+const enhancer = compose(
+    connect(mapStateToProps, mapDispatchToProps)
+);
+
+const { string, func } = PropTypes;
+
+function App(props) {
     const classes = useStyles();
 
     const [gamepads, setGamepads] = useState([]);
+
+    const { controllersList, controllersListStatus, loadRegisteredControllers } = props;
 
     const handleGamepadConnected = (e) => {
         console.log(`Gamepad connected at index ${ e.gamepad.index}`);
@@ -49,6 +44,7 @@ function App() {
     useEffect(() => {
         window.addEventListener('gamepadconnected', handleGamepadConnected);
         window.addEventListener('gamepaddisconnected', handleGamepadDisconnected);
+        loadRegisteredControllers();
         return () => {
             window.removeEventListener('gamepadconnected', handleGamepadConnected);
             window.removeEventListener('gamepaddisconnected', handleGamepadDisconnected);
@@ -62,7 +58,7 @@ function App() {
                   {
                       map(gamepads, gamepad =>
                           <Grid key={gamepad.index} className={classes.gamepad} item xs="auto">
-                            <GamepadItem instance={gamepad} />
+                            <Controller instance={gamepad} />
                           </Grid>
                       )
                   }
@@ -80,4 +76,10 @@ function App() {
   );
 }
 
-export default App;
+App.propTypes = {
+    controllersList: PropTypes.instanceOf(List),
+    controllersListStatus: string,
+    loadRegisteredControllers: func
+};
+
+export default enhancer(App);
