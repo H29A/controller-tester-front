@@ -6,7 +6,6 @@ import { Provider } from 'react-redux';
 import { loadState } from './utils/persist';
 import configureStore from './store';
 
-import './index.css';
 import App from './Containers/App';
 import theme from './theme';
 
@@ -14,6 +13,8 @@ import theme from './theme';
 // Loading persisted state
 const initialState = loadState();
 const store = configureStore(initialState);
+
+document.body.style.margin = '0';
 
 ReactDOM.render(
   <React.StrictMode>

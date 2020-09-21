@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
-import { Map } from 'immutable';
 import PropTypes from 'prop-types';
+import ImmutablePropTypes from 'react-immutable-proptypes';
 
 import {
     Grid, Slider, Button, Switch, FormControlLabel,
@@ -11,10 +11,10 @@ import {
 
 import { useStyles } from './styles';
 
-import { registerControllerRequested } from '../../store/controllers/actions';
+import { registerControllerRequested } from '../../../store/controllers/actions';
 import { selectControllerData as mapStateToProps }  from  './selectors';
 
-import GamepadIcon from '../../Components/Icons/ControllerIcon'
+import ControllerIcon from '../../../Components/Icons/ControllerIcon'
 
 const mapDispatchToProps = (dispatch) => ({
     registerController: (controllerData) => dispatch(registerControllerRequested(controllerData))
@@ -41,8 +41,9 @@ const maxValues = {
 };
 
 const { func, string } = PropTypes;
+const { map } = ImmutablePropTypes;
 
-function Controller(props) {
+function ControllerItem(props) {
     const classes = useStyles();
 
     const [state, setState] = useState(initialState);
@@ -66,7 +67,6 @@ function Controller(props) {
 
     const handleStart = () => {
         if (isNeedRepeat) {
-            handleStop();
             pulse();
             setPulseInterval(setInterval(pulse, duration + delay - 20));
             setIsStarted(true);
@@ -81,6 +81,7 @@ function Controller(props) {
     };
 
     const handleChange = (name, value) => {
+        console.log({ [name]: value });
         const sum = delay + duration;
         switch (name) {
             case 'delay':
@@ -113,62 +114,69 @@ function Controller(props) {
     }, []); // eslint-disable-line
 
     return(
-        <Grid container spacing={3} className={classes.root}>
-            <div className={classes.paper}>
-                <Grid container justify="center">
-                    <GamepadIcon />
-                </Grid>
+        <Grid container>
+            <Grid item sm={12}>
+                <FormHelperText>{instance.id}</FormHelperText>
+            </Grid>
 
-                <FormHelperText style={{ marginBottom: '20px', textAlign: 'center' }}>{instance.id}</FormHelperText>
-
+            <Grid item sm={12}>
                 <Typography gutterBottom>Delay: {delay} ms</Typography>
                 <Slider aria-labelledby="input-slider"
                         value={delay} defaultValue={0} step={10} min={0} max={maxValues.delay}
                         onChange={(e, value) => handleChange("delay", value)} />
+            </Grid>
 
+            <Grid item sm={12}>
                 <Typography gutterBottom>Duration: {duration} ms</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={duration} defaultValue={1000} step={100} min={100} max={maxValues.duration}
+                        value={duration} defaultValue={1000} step={10} min={100} max={maxValues.duration}
                         onChange={(e, value) => handleChange("duration", value)} />
+            </Grid>
 
+            <Grid item sm={12}>
                 <Typography gutterBottom>Weak magnitude</Typography>
                 <Slider aria-labelledby="input-slider"
                         value={weakMagnitude} defaultValue={1} step={0.01} min={0} max={maxValues.weakMagnitude}
                         onChange={(e, value) => handleChange("weakMagnitude", value)}/>
+            </Grid>
 
+            <Grid item sm={12}>
                 <Typography gutterBottom>Strong magnitude</Typography>
                 <Slider aria-labelledby="input-slider"
                         value={strongMagnitude} defaultValue={1} step={0.01} min={0} max={maxValues.strongMagnitude}
                         onChange={(e, value) => handleChange("strongMagnitude", value)} />
+            </Grid>
 
-                <Grid container className={classes.root} spacing={2}>
-                    <Grid item xs={5} className={classes.switch}>
-                        <FormControlLabel
-                            control={<Switch checked={isNeedRepeat} disabled={isStarted} onChange={() => handleChange("isNeedRepeat", !isNeedRepeat)}/>}
-                            label="Interval repeat"
-                        />
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Button className={classes.button} variant="contained" onClick={handleStart} disabled={isStarted}>Start</Button>
-                    </Grid>
-                    <Grid item xs={3}>
-                        <Button className={classes.button} variant="contained" onClick={handleStop} disabled={!isStarted}>Stop</Button>
-                    </Grid>
-                    <Grid item xs={12}>
-                        { isStarted &&
-                            <LinearProgress color="secondary" />
-                        }
-                    </Grid>
+            <Grid container justify="flex-end" spacing={2}>
+                <Grid item>
+                    <FormControlLabel
+                        control={<Switch checked={isNeedRepeat} disabled={isStarted} onChange={() => handleChange("isNeedRepeat", !isNeedRepeat)}/>}
+                        label="Interval repeat"
+                    />
                 </Grid>
-            </div>
+
+                <Grid item>
+                    <Button className={classes.button} variant="contained" onClick={handleStart} disabled={isStarted}>Start</Button>
+                </Grid>
+
+                <Grid item>
+                    <Button className={classes.button} variant="contained" onClick={handleStop} disabled={!isStarted}>Stop</Button>
+                </Grid>
+
+                <Grid item xs={12}>
+                    { isStarted &&
+                        <LinearProgress color="secondary" />
+                    }
+                </Grid>
+            </Grid>
         </Grid>
     );
 }
 
-Controller.propTypes = {
+ControllerItem.propTypes = {
     registerController: func,
-    registeredController: PropTypes.instanceOf(Map),
+    registeredController: map,
     registrationControllerStatus: string
 };
 
-export default enhancer(Controller);
+export default enhancer(ControllerItem);

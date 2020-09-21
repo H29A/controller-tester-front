@@ -1,27 +1,14 @@
-import { makeStyles } from '@material-ui/core';
+import { makeStyles } from '@material-ui/core/styles';
 
 export const useStyles = makeStyles((theme) => ({
-    header: {
+    app: {
+        padding: '16px',
         backgroundColor: '#282c34',
-        minHeight: '100vh',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
         fontSize: 'calc(10px + 2vmin)',
-        color: 'white'
-    },
-    root: {
-        width: '1500px',
-        justifyContent: 'center'
-    },
-    paper: {
-        padding: '25px 25px 15px 25px'
-    },
-    progress: {
-        margin: '20px 0 0 0'
-    },
-    gamepad: {
-        margin: '70px'
+        color: 'white',
+        background: 'transparent',
+        fontFamily: theme.font.family,
+        [Object.keys(theme.font.webkitSmoothing)[0]]: Object.values(theme.font.webkitSmoothing)[0],
+        [Object.keys(theme.font.mozSmoothing)[0]]: Object.values(theme.font.mozSmoothing)[0],
     }
 }));

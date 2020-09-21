@@ -2,7 +2,6 @@ import { makeStyles } from '@material-ui/core';
 
 export const useStyles = makeStyles((theme) => ({
     root: {
-        minWidth: '550px',
         justifyContent: 'center',
         alignItems: 'center',
     },

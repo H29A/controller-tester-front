@@ -13,11 +13,21 @@ const theme = createMuiTheme({
             rail: {
                 color: '#f50057'
             }
+        },
+        MuiCircularProgress: {
+            circle: {
+                color: '#f50057'
+            }
         }
     },
     palette: {
         type: 'dark'
     },
+    font: {
+        family: '-apple-system, BlinkMacSystemFont, \'Segoe UI\', \'Roboto\', \'Oxygen\', \'Ubuntu\', \'Cantarell\', \'Fira Sans\', \'Droid Sans\', \'Helvetica Neue\', sans-serif',
+        webkitSmoothing: { '-webkit-font-smoothing': 'antialiased' },
+        mozSmoothing: { '-moz-osx-font-smoothing': 'grayscale' }
+    }
 });
 
 export default theme;
