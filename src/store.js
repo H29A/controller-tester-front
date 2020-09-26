@@ -1,6 +1,9 @@
 import { createStore, applyMiddleware, compose } from 'redux';
 import createSagaMiddleware from 'redux-saga';
 import { fromJS } from 'immutable';
+import { throttle } from 'lodash';
+
+import { saveState } from './utils/persist';
 
 import createReducer from './reducers';
 import sagas from './store/controllers/sagas';
@@ -9,7 +12,7 @@ const injectSyncSagas = (inject) => (sagas) => sagas.forEach(inject);
 const sagaMiddleware = createSagaMiddleware();
 
 export default function configureStore(initialState = {}) {
-    // Create the store with N middlewares
+    // Create the store with 1 middleware
     // 1. sagaMiddleware: Makes redux-sagas work
     const middlewares = [
         sagaMiddleware
@@ -33,13 +36,11 @@ export default function configureStore(initialState = {}) {
         composeEnhancers(...enhancers)
     );
 
-    /* Saving state to local storage
     store.subscribe(throttle(() => {
         saveState({
-            controllers: store.getState().get('controllers')
+            ui: store.getState().get('ui')
         });
     }, 1000));
-    */
 
     store.runSaga = sagaMiddleware.run;
 

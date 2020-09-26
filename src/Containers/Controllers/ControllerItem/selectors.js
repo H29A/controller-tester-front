@@ -1,11 +1,14 @@
 import { createSelector } from 'reselect';
 import { selectRegistrationController, selectRegistrationControllerStatus } from '../../../store/controllers/selectors';
+import { selectVibrationActuatorData } from '../../../store/ui/selectors';
 
 export const selectControllerData = () => createSelector(
     selectRegistrationController(),
     selectRegistrationControllerStatus(),
-    (registrationController, registrationControllerStatus) => ({
+    selectVibrationActuatorData(),
+    (registrationController, registrationControllerStatus, vibrationActuatorData) => ({
         registeredController: registrationController,
-        registrationControllerStatus
+        registrationControllerStatus,
+        vibrationActuatorData
     })
 );

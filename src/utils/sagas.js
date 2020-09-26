@@ -21,6 +21,7 @@ function* throttle(action, generator, time) {
  */
 function* watcher(actionType, generator) {
     let action;
+    // eslint-disable-next-line no-cond-assign
     while (action = yield take(actionType)) {
         yield call(generator, action);
     }
@@ -36,6 +37,7 @@ function* watcher(actionType, generator) {
 function* watcherDelay(actionType, generator, time) {
     let action;
     let task;
+    // eslint-disable-next-line no-cond-assign
     while (action = yield take(actionType)) {
         if (task && task.isRunning()) {
             task.cancel();

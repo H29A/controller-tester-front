@@ -5,6 +5,7 @@
 
 import { combineReducers } from 'redux-immutable';
 import controllersReducer from './store/controllers/reducers';
+import uiReducer from './store/ui/reducers';
 
 /**
  * Creates the main reducer with the asynchronously loaded ones
@@ -12,6 +13,7 @@ import controllersReducer from './store/controllers/reducers';
 export default function createReducer(asyncReducers) {
     const appReducer = combineReducers({
         controllers: controllersReducer,
+        ui: uiReducer,
         ...asyncReducers
     });
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
-import PropTypes from 'prop-types';
-import ImmutablePropTypes from 'react-immutable-proptypes';
+import PropTypes, {object} from 'prop-types';
+import { map, assign } from 'lodash';
 
 import {
     Grid, Slider, Button, Switch, FormControlLabel,
@@ -10,65 +10,44 @@ import {
 } from '@material-ui/core';
 
 import { useStyles } from './styles';
+import { maxValues } from './constants';
 
 import { registerControllerRequested } from '../../../store/controllers/actions';
+import { changeVibrationActuatorData } from '../../../store/ui/actions';
 import { selectControllerData as mapStateToProps }  from  './selectors';
 
-import ControllerIcon from '../../../Components/Icons/ControllerIcon'
-
 const mapDispatchToProps = (dispatch) => ({
-    registerController: (controllerData) => dispatch(registerControllerRequested(controllerData))
+    registerController: controllerData => dispatch(registerControllerRequested(controllerData)),
+    changeVibrationActuatorData: data => dispatch(changeVibrationActuatorData(data))
 });
 
 const enhancer = compose(
     connect(mapStateToProps, mapDispatchToProps)
 );
 
-const initialState = {
-    delay: 0,
-    duration: 1000,
-    weakMagnitude: 0.5,
-    strongMagnitude: 0,
-    isNeedRepeat: false,
-    pressedButtons: []
-};
-
-const maxValues = {
-    delay: 2000,
-    duration: 5000,
-    weakMagnitude: 1.0,
-    strongMagnitude: 1.0
-};
-
 const { func, string } = PropTypes;
-const { map } = ImmutablePropTypes;
 
 function ControllerItem(props) {
     const classes = useStyles();
 
-    const [state, setState] = useState(initialState);
-
     const [pulseInterval, setPulseInterval] = useState(null);
     const [isStarted, setIsStarted] = useState(false);
+    const [isNeedRepeat, setIsNeedRepeat] = useState(false);
 
-    const { instance, registerController } = props;
-    const { delay, duration, weakMagnitude, strongMagnitude, isNeedRepeat } = state;
+    const { instance, registerController, vibrationActuatorData, changeVibrationActuatorData } = props;
+    const { startDelay, duration, weakMagnitude, strongMagnitude } = vibrationActuatorData;
 
     const pulse = () => {
-        const pulseParams = {
-            startDelay: delay,
-            duration: duration,
-            weakMagnitude: weakMagnitude,
-            strongMagnitude: strongMagnitude
-        };
+        const pulseParams = vibrationActuatorData;
         console.log('Vibration pulse started with parameters: %o', pulseParams);
         return instance.vibrationActuator.playEffect('dual-rumble', pulseParams);
     };
 
     const handleStart = () => {
         if (isNeedRepeat) {
+            handleStop();
             pulse();
-            setPulseInterval(setInterval(pulse, duration + delay - 20));
+            setPulseInterval(setInterval(pulse, duration + startDelay - 20));
             setIsStarted(true);
         } else {
             pulse();
@@ -81,24 +60,28 @@ function ControllerItem(props) {
     };
 
     const handleChange = (name, value) => {
-        console.log({ [name]: value });
-        const sum = delay + duration;
+        const sum = startDelay + duration;
+        let data = {};
+
         switch (name) {
-            case 'delay':
+            case 'startDelay':
                 if (sum >= maxValues.duration) {
-                    setState({ ...state, delay: value, duration: maxValues.duration - delay });
+                    data = { startDelay: value, duration: maxValues.duration - startDelay }
                     break;
                 }
             // eslint-disable-next-line no-fallthrough
             case 'duration':
                 if (sum >= maxValues.duration) {
-                    setState({ ...state, delay: delay - (sum - maxValues.duration), duration: value });
+                    data = { duration: value, startDelay: startDelay - (sum - maxValues.duration) }
                     break;
                 }
             // eslint-disable-next-line no-fallthrough
             default:
-                setState({ ...state, [name]: value });
+                data = { [name]: value };
         }
+
+
+        changeVibrationActuatorData(assign(vibrationActuatorData, data));
 
         if (isStarted) {
             handleStop();
@@ -117,13 +100,17 @@ function ControllerItem(props) {
         <Grid container>
             <Grid item sm={12}>
                 <FormHelperText>{instance.id}</FormHelperText>
+                { map(instance.buttons, (button, index) => {
+                    return <div key={index}>{index + 1}: {button.value}</div>
+                  })
+                }
             </Grid>
 
             <Grid item sm={12}>
-                <Typography gutterBottom>Delay: {delay} ms</Typography>
+                <Typography gutterBottom>Delay: {startDelay} ms</Typography>
                 <Slider aria-labelledby="input-slider"
-                        value={delay} defaultValue={0} step={10} min={0} max={maxValues.delay}
-                        onChange={(e, value) => handleChange("delay", value)} />
+                        value={startDelay} defaultValue={0} step={10} min={0} max={maxValues.startDelay}
+                        onChange={(e, value) => handleChange("startDelay", value)} />
             </Grid>
 
             <Grid item sm={12}>
@@ -150,7 +137,7 @@ function ControllerItem(props) {
             <Grid container justify="flex-end" spacing={2}>
                 <Grid item>
                     <FormControlLabel
-                        control={<Switch checked={isNeedRepeat} disabled={isStarted} onChange={() => handleChange("isNeedRepeat", !isNeedRepeat)}/>}
+                        control={<Switch checked={isNeedRepeat} disabled={isStarted} onChange={() => setIsNeedRepeat(!isNeedRepeat)}/>}
                         label="Interval repeat"
                     />
                 </Grid>
@@ -174,8 +161,9 @@ function ControllerItem(props) {
 }
 
 ControllerItem.propTypes = {
+    vibrationActuatorData: object,
     registerController: func,
-    registeredController: map,
+    changeVibrationActuatorData: func,
     registrationControllerStatus: string
 };
 
