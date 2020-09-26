@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { connect } from 'react-redux';
 import { compose } from 'recompose';
-import PropTypes, {object} from 'prop-types';
+import PropTypes from 'prop-types';
 import { map, assign } from 'lodash';
 
 import {
@@ -25,7 +25,7 @@ const enhancer = compose(
     connect(mapStateToProps, mapDispatchToProps)
 );
 
-const { func, string } = PropTypes;
+const { object, string, func } = PropTypes;
 
 function ControllerItem(props) {
     const classes = useStyles();
@@ -66,20 +66,19 @@ function ControllerItem(props) {
         switch (name) {
             case 'startDelay':
                 if (sum >= maxValues.duration) {
-                    data = { startDelay: value, duration: maxValues.duration - startDelay }
+                    data = { startDelay: value, duration: maxValues.duration - startDelay };
                     break;
                 }
             // eslint-disable-next-line no-fallthrough
             case 'duration':
                 if (sum >= maxValues.duration) {
-                    data = { duration: value, startDelay: startDelay - (sum - maxValues.duration) }
+                    data = { duration: value, startDelay: startDelay - (sum - maxValues.duration) };
                     break;
                 }
             // eslint-disable-next-line no-fallthrough
             default:
                 data = { [name]: value };
         }
-
 
         changeVibrationActuatorData(assign(vibrationActuatorData, data));
 
@@ -98,12 +97,72 @@ function ControllerItem(props) {
 
     return(
         <Grid container>
-            <Grid item sm={12}>
-                <FormHelperText>{instance.id}</FormHelperText>
-                { map(instance.buttons, (button, index) => {
-                    return <div key={index}>{index + 1}: {button.value}</div>
-                  })
-                }
+            <Typography variant="h5">{instance.id}</Typography>
+            <Grid item className={classes.infoWrapper} sm={12}>
+                <Grid container spacing={2}>
+                    <Grid item>
+                        <Typography>Index</Typography>
+                        <FormHelperText>{instance.index}</FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Connected</Typography>
+                        <FormHelperText>{instance.connected ? 'Yes' : 'n/a'}</FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Mapping</Typography>
+                        <FormHelperText>{instance.mapping}</FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Timestamp</Typography>
+                        <FormHelperText>{instance.timestamp.toFixed(4)}</FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Pose</Typography>
+                        <FormHelperText>
+                            { instance.pose && Object.keys(instance.pose).length > 0
+                                ? 'Yes'
+                                : 'n/a'
+                            }
+                        </FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Hand</Typography>
+                        <FormHelperText>{instance.hand ? instance.hand : 'n/a'}</FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>HapticActuators</Typography>
+                        <FormHelperText>{instance.hapticActuators && Object.keys(instance.hapticActuators).length > 0
+                            ? 'Yes'
+                            : 'n/a'}
+                        </FormHelperText>
+                    </Grid>
+                    <Grid item>
+                        <Typography>Vibration</Typography>
+                        <FormHelperText>{instance.vibrationActuator && instance.vibrationActuator.type
+                            ? 'Yes'
+                            : 'n/a'}
+                        </FormHelperText>
+                    </Grid>
+                </Grid>
+
+                <Grid container spacing={2}>
+                    { map(instance.buttons, (button, index) => {
+                        return <Grid item key={index}>
+                                    <Typography>B{index + 1}</Typography>
+                                    <FormHelperText>{button.value.toFixed(2)}</FormHelperText>
+                                </Grid>
+                        })
+                    }
+                </Grid>
+                <Grid container spacing={2}>
+                    { map(instance.axes, (axis, index) => {
+                        return <Grid item key={index}>
+                                    <Typography>Axis {index + 1}</Typography>
+                                    <FormHelperText>{axis.toFixed(4)}</FormHelperText>
+                                </Grid>
+                        })
+                    }
+                </Grid>
             </Grid>
 
             <Grid item sm={12}>

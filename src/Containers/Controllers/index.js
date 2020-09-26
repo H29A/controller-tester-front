@@ -17,7 +17,7 @@ function App() {
         // Convert to real array and remove nullable elements
         const realArray = filter([...navigator.getGamepads()], Boolean);
         setControllers(realArray);
-        requestAnimationFrame(() => tick())
+        requestAnimationFrame(() => tick());
     };
 
     useEffect(() => tick(), []); // eslint-disable-line

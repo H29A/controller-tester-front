@@ -5,7 +5,7 @@ export const useStyles = makeStyles((theme) => ({
         minHeight: '56px'
     },
     loaderWrapper: {
-        minHeight: '130px',
+        minHeight: '600px',
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

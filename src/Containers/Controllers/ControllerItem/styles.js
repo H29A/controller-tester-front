@@ -14,5 +14,9 @@ export const useStyles = makeStyles((theme) => ({
     },
     switch: {
         minWidth: '190px'
+    },
+    infoWrapper: {
+        marginTop: '20px',
+        marginBottom: '20px'
     }
 }));
